@@ -1,28 +1,26 @@
+using Calculator;
+
 namespace Calculator
 {
     public partial class Form1 : Form
     {
-        private double storedOperand;
-        private string storedOperation;
-        private string currentInput;
-        private string _warningLabelText;
+        private CalculatorUnit calculator ;
+
 
         public Form1()
         {
             InitializeComponent();
             KeyPreview = true;
+            calculator = new CalculatorUnit();
             ResetCalculator();
             KeyPress += Form1_KeyPress;
         }
 
         private void ResetCalculator()
         {
-            storedOperand = 0;
-            storedOperation = null;
-            currentInput = "";
+            calculator.Reset();
             UpdateDisplay();
             ClearInputPanels();
-            WarningLabelText.Text = string.Empty;
         }
 
         private void ClearInputPanels()
@@ -41,38 +39,15 @@ namespace Calculator
         private void OnNumberButtonClick(object sender, EventArgs e)
         {
             Button button = (Button)sender;
-            string buttonText = button.Text;
-
-            if (char.IsDigit(buttonText[0]) || buttonText == ".")
-            {
-                currentInput += buttonText;
-                WarningLabelText.Text = string.Empty;
-            }
-            else
-            {
-                HandleOperation(buttonText);
-            }
-
+            char digit = button.Text[0];
+            calculator.EnterNumber(digit);
             UpdateDisplay();
         }
 
         private void HandleOperation(string operation)
         {
-            if (!string.IsNullOrEmpty(storedOperation))
-            {
-                PerformCalculation();
-            }
-
-            if (!string.IsNullOrEmpty(currentInput))
-            {
-                storedOperand = double.Parse(currentInput);
-                storedOperation = operation;
-                currentInput = "";
-            }
-            else
-            {
-                storedOperation = operation;
-            }
+            calculator.EnterOperation(operation);
+            UpdateDisplay();
         }
 
         private void OperationButtonClick(object sender, EventArgs e)
@@ -87,82 +62,40 @@ namespace Calculator
         private void DecimalButtonClick(object sender, EventArgs e)
         {
 
-            if (!currentInput.Contains("."))
-            {
-                currentInput += ".";
-            }
-
+            calculator.EnterDecimal();
             UpdateDisplay();
         }
 
 
         private void PerformCalculation()
         {
-            if (!string.IsNullOrEmpty(storedOperation) && !string.IsNullOrEmpty(currentInput))
-            {
-                double currentInputValue = double.Parse(currentInput);
-
-                switch (storedOperation)
-                {
-                    case "+":
-                        storedOperand += currentInputValue;
-                        break;
-                    case "-":
-                        storedOperand -= currentInputValue;
-                        break;
-                    case "*":
-                        storedOperand *= currentInputValue;
-                        break;
-                    case "/":
-                        if (currentInputValue != 0)
-                        {
-                            storedOperand /= currentInputValue;
-                        }
-                        else
-                        {
-                            _warningLabelText = "Error: Division by zero";
-                            WarningLabelText.Text = _warningLabelText;
-                        }
-                        break;
-                }
-                storedOperand = Math.Round(storedOperand, 8);
-
-                storedOperation = null;
-                currentInput = storedOperand.ToString();
-            }
-
+            calculator.PerformCalculation();
+            UpdateDisplay();
         }
 
         private void UpdateDisplay()
         {
-
             if (displayPanel != null)
             {
-                if (!string.IsNullOrEmpty(storedOperation))
-                {
-                    displayPanel.Text = $"{storedOperand} {storedOperation}";
-                }
-                else
-                {
-                    displayPanel.Text = "";
-                }
+                displayPanel.Text = calculator.GetDisplayText();
             }
 
             if (binaryDisplay != null)
             {
-                binaryDisplay.Text = ConvertToBinary(currentInput);
+                binaryDisplay.Text = calculator.GetBinaryDisplay();
             }
 
             if (hexDisplay != null)
             {
-                hexDisplay.Text = ConvertToHexadecimal(currentInput);
+                hexDisplay.Text = calculator.GetHexadecimalDisplay();
             }
 
             if (inputPanel != null)
             {
-                inputPanel.Text = currentInput;
+                inputPanel.Text = calculator.GetDisplayText();
             }
 
+            WarningLabelText.Text = calculator.GetWarningLabelText();
         }
 
         private string ConvertToBinary(string value)
@@ -240,26 +173,33 @@ namespace Calculator
 
         private void HandleKeyPress(char keyPressed)
         {
-            string key = keyPressed.ToString();
-
-            if (char.IsDigit(key[0]) || key == ".")
+            if (keyPressed == '.')
             {
-                WarningLabelText.Text = string.Empty;
-                currentInput += key;
-            }
-            else if (key == "+" || key == "-" || key == "*" || key == "/")
-            {
-                HandleOperation(key);
-            }
-            else if (key == "=" || key == "\r") 
-            {
-                PerformCalculation();
+                calculator.EnterDecimal();
             }
             else
             {
-                _warningLabelText = "Invalid input: Letters are not allowed.";
-                WarningLabelText.Text = _warningLabelText;
+                string key = keyPressed.ToString();
+
+                if (char.IsDigit(key[0]))
+                {
+                    WarningLabelText.Text = string.Empty;
+                    calculator.EnterNumber(key[0]);
+                }
+                else if (key == "+" || key == "-" || key == "*" || key == "/")
+                {
+                    HandleOperation(key);
+                }
+                else if (key == "=" || key == "\r")
+                {
+                    PerformCalculation();
+                }
+                else
+                {
+                    WarningLabelText.Text = calculator.GetWarningLabelText();
+                }
             }
+
             UpdateDisplay();
         }
 
@@ -270,7 +210,6 @@ namespace Calculator
             HandleKeyPress(e.KeyChar);
 
         }
-
 
     }
 }

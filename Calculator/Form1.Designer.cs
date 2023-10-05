@@ -250,7 +250,6 @@
             button16.UseVisualStyleBackColor = true;
             button16.Click += OnClearButtonClick;
             button16.Enter += OnClearButtonClick;
-           
             // 
             // Binary
             // 
@@ -333,7 +332,6 @@
             Controls.Add(displayPanel);
             Name = "Form1";
             RightToLeftLayout = true;
-
             ResumeLayout(false);
             PerformLayout();
         }

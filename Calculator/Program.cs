@@ -1,3 +1,5 @@
+using Calculator;
+
 namespace Calculator
 {
     internal static class Program
