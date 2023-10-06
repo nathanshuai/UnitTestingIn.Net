@@ -8,9 +8,22 @@ namespace Calculator
 {
     public class CalculatorUnit
     {
-        private double storedOperand;
-        private string storedOperation;
-        private string currentInput;
+        public double storedOperand;
+        public string storedOperation;
+        private double storedValue;
+
+        public double _storedValue
+        {
+            get
+            {
+                return storedValue;
+            }
+            set
+            {
+                storedValue = value;
+            }
+        }
+        public string currentInput;
         private string _warningLabelText;
 
         public void Reset()
@@ -18,6 +31,7 @@ namespace Calculator
             storedOperand = 0;
             storedOperation = null;
             currentInput = "";
+            storedValue = 0;
             _warningLabelText = string.Empty;
         }
 
@@ -28,7 +42,18 @@ namespace Calculator
                 currentInput += digit;
                 _warningLabelText = string.Empty;
             }
+
         }
+        public string GetCurrentInput()
+        {
+            return currentInput;
+        }
+
+        public string GetWarningLabelText()
+        {
+            return _warningLabelText;
+        }
+
 
         public void EnterDecimal()
         {
@@ -56,7 +81,7 @@ namespace Calculator
             }
         }
 
-        public void PerformCalculation()
+        public double PerformCalculation()
         {
             if (!string.IsNullOrEmpty(storedOperation) && !string.IsNullOrEmpty(currentInput))
             {
@@ -65,18 +90,18 @@ namespace Calculator
                 switch (storedOperation)
                 {
                     case "+":
-                        storedOperand += currentInputValue;
+                        storedValue = storedOperand + currentInputValue;
                         break;
                     case "-":
-                        storedOperand -= currentInputValue;
+                        storedValue = storedOperand - currentInputValue;
                         break;
                     case "*":
-                        storedOperand *= currentInputValue;
+                        storedValue = storedOperand * currentInputValue;
                         break;
                     case "/":
                         if (currentInputValue != 0)
                         {
-                            storedOperand /= currentInputValue;
+                            storedValue = storedOperand / currentInputValue;
                         }
                         else
                         {
@@ -84,17 +109,35 @@ namespace Calculator
                         }
                         break;
                 }
-                storedOperand = Math.Round(storedOperand, 8);
 
+                storedOperand = 0;
                 storedOperation = null;
-                currentInput = storedOperand.ToString();
+                currentInput = null;
+
+                // Return the rounded result
+                return Math.Round(storedValue, 8);
             }
+
+            // If the calculation doesn't happen, return a default value
+            return 0.0;
         }
 
         public string GetDisplayText()
         {
-            return $"{storedOperand} {storedOperation}";
+            if (storedValue != 0)
+            {
+                return $"{storedValue}";
+            }
+            else if (storedOperand == 0)
+            {
+                return $"{currentInput}";
+            }
+            else
+            {
+                return $"{storedOperand} {storedOperation} {currentInput}";
+            }
         }
+
 
         public string GetBinaryDisplay()
         {
@@ -134,10 +177,7 @@ namespace Calculator
             }
         }
 
-        public string GetWarningLabelText()
-        {
-            return _warningLabelText;
-        }
+
 
     }
 }

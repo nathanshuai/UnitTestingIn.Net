@@ -1,11 +1,8 @@
-using Calculator;
-
 namespace Calculator
 {
     public partial class Form1 : Form
     {
-        private CalculatorUnit calculator ;
-
+        private CalculatorUnit calculator;
 
         public Form1()
         {
